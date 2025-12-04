@@ -271,106 +271,111 @@
 </template>
 
 <script>
+import axios from "axios"
+
 export default {
-  name: 'Contact',
+  name: "Contact",
   data() {
     return {
       formData: {
-        name: '',
-        email: '',
-        phone: '',
-        service: '',
-        budget: '',
-        message: ''
+        name: "",
+        email: "",
+        phone: "",
+        service: "",
+        budget: "",
+        message: "",
       },
       isSubmitting: false,
       submitSuccess: false,
       submitError: false,
-      errorMessage: '',
+      errorMessage: "",
       faqs: [
         {
           id: 1,
-          question: 'How long does a typical project take?',
-          answer: 'Timeline varies by project scope. A single room refresh typically takes 4-6 weeks, while full home designs can take 3-6 months from consultation to completion.',
-          open: false
+          question: "How long does a typical project take?",
+          answer:
+            "Timeline varies by project scope. A single room refresh typically takes 4–6 weeks, while full home designs can take 3–6 months.",
+          open: false,
         },
         {
           id: 2,
-          question: 'Do you work within specific budgets?',
-          answer: 'Yes! We work with a range of budgets and can tailor our services accordingly. During our initial consultation, we discuss your budget and create a plan that works for you.',
-          open: false
+          question: "Do you work within specific budgets?",
+          answer:
+            "Yes! We work with a range of budgets and tailor our services accordingly.",
+          open: false,
         },
         {
           id: 3,
-          question: 'What areas do you serve?',
-          answer: 'We primarily serve the New York metropolitan area, but also take on select projects nationally. Virtual consultations are available for clients anywhere.',
-          open: false
+          question: "What areas do you serve?",
+          answer:
+            "We serve the New York area but also take on national projects. Virtual consultations available.",
+          open: false,
         },
         {
           id: 4,
-          question: 'Can I purchase items on my own?',
-          answer: 'Absolutely! We can provide shopping lists and guidance for you to purchase items yourself, or we can handle all procurement through our trade accounts.',
-          open: false
+          question: "Can I purchase items on my own?",
+          answer:
+            "Yes! We provide shopping lists or handle procurement through trade accounts.",
+          open: false,
         },
         {
           id: 5,
-          question: 'Do you offer virtual design services?',
-          answer: 'Yes, we offer comprehensive virtual design services including consultations, e-design packages, and remote project management for clients outside our local area.',
-          open: false
-        }
-      ]
+          question: "Do you offer virtual design services?",
+          answer:
+            "Yes, including remote project management and e-design packages.",
+          open: false,
+        },
+      ],
     }
   },
+
   methods: {
     async handleSubmit() {
-      this.isSubmitting = true;
-      this.submitError = false;
-      this.errorMessage = '';
+      this.isSubmitting = true
+      this.submitError = false
+      this.errorMessage = ""
 
       try {
-        const response = await fetch('http://localhost:3000/api/contact', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(this.formData)
-        });
+        // Contact Microservice (Go)
+        const response = await axios.post(
+          import.meta.env.VITE_CONTACT_API + "/contact",
+          this.formData
+        )
 
-        const data = await response.json();
+        if (response.data.success) {
+          this.submitSuccess = true
 
-        if (response.ok && data.success) {
-          this.submitSuccess = true;
           this.formData = {
-            name: '',
-            email: '',
-            phone: '',
-            service: '',
-            budget: '',
-            message: ''
-          };
+            name: "",
+            email: "",
+            phone: "",
+            service: "",
+            budget: "",
+            message: "",
+          }
 
-          // Hide success message after 5 seconds
-          setTimeout(() => {
-            this.submitSuccess = false;
-          }, 5000);
+          setTimeout(() => (this.submitSuccess = false), 5000)
         } else {
-          this.submitError = true;
-          this.errorMessage = data.message || 'Failed to submit form. Please try again.';
+          this.submitError = true
+          this.errorMessage =
+            response.data.message ||
+            "Failed to submit form. Please try again."
         }
       } catch (error) {
-        console.error('Error submitting form:', error);
-        this.submitError = true;
-        this.errorMessage = 'Network error. Please check your connection and try again.';
+        console.error("Contact form error:", error)
+        this.submitError = true
+        this.errorMessage =
+          error.response?.data?.message ||
+          "Network error. Please try again."
       } finally {
-        this.isSubmitting = false;
+        this.isSubmitting = false
       }
     },
+
     toggleFAQ(id) {
-      const faq = this.faqs.find(f => f.id === id);
-      if (faq) {
-        faq.open = !faq.open;
-      }
-    }
-  }
+      const faq = this.faqs.find((f) => f.id === id)
+      if (faq) faq.open = !faq.open
+    },
+  },
 }
 </script>
